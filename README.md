@@ -25,7 +25,7 @@
     <!-- <a href="https://github.com/estebanvz/portafolio_optimization"><strong>Explore the docs »</strong></a>
     <br /> -->
     <br />
-    <a href="https://github.com/estebanvz/portafolio_optimization/">View Test</a>
+    <a href="https://colab.research.google.com/drive/13X7DarOo4SaqaUodcXIPNqiNxSlHSNMA?usp=sharing">View Test Colab</a>
     ·
     <a href="https://github.com/estebanvz/portafolio_optimization/issues">Report Bug</a>
     ·
