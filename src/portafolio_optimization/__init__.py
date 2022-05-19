@@ -114,7 +114,7 @@ class Optimizador:
         data = data / data.iloc[0]*100
         data["Thal-ia"] = variations
         print(data.tail())
-        data[self.n_lags-1:].plot()
+        data.plot()
 
     def run(self, l_dataset, dataset):
         options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
@@ -151,3 +151,5 @@ if __name__ == "__main__":
     sharpe, cash, variations = opt.calc_cash(dataset, pesos)
     opt.plot(dataset, variations)
     sharpe, cash
+
+# %%
