@@ -65,10 +65,10 @@ class Optimizador:
 
     def nn_structure(self, lagged_dataset, w):
         result = lagged_dataset @ np.reshape(
-            w[:self.n_action*self.n_lags*self.neurons], (self.n_action*self.n_lags, self.neurons))
+            w[:self.n_actions*self.n_lags*self.neurons], (self.n_actions*self.n_lags, self.neurons))
         result = np.tanh(result)
-        result = result @ np.reshape(w[self.n_action *
-                                     self.n_lags*self.neurons:], (self.neurons, self.n_action))
+        result = result @ np.reshape(w[self.n_actions *
+                                     self.n_lags*self.neurons:], (self.neurons, self.n_actions))
         result[result < 0] = 0
         for index in range(len(result)):
             result.iloc[index] = result.iloc[index] / \
@@ -119,7 +119,7 @@ class Optimizador:
     def run(self, l_dataset, dataset):
         options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
         optimizer = ps.single.GlobalBestPSO(
-            n_particles=20, dimensions=self.neurons*self.n_action*(self.n_lags+1), options=options)
+            n_particles=20, dimensions=self.neurons*self.n_actions*(self.n_lags+1), options=options)
         return optimizer.optimize(self.optimization, iters=100, lagged_dataset=l_dataset, dataset=dataset, n_processes=4)
 
 
