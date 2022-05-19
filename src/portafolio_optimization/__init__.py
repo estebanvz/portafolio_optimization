@@ -3,14 +3,14 @@ import pandas as pd
 import numpy as np
 import pyswarms as ps
 np.set_printoptions(precision=4, suppress=True)
-N_ACTIONS = 6
-N_LAGS = 3
-NEURONS = 10
+
 
 
 class Optimizador:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, n_actions, n_lags, neurons) -> None:
+        self.n_actions = n_actions
+        self.neurons = neurons
+        self.n_lags = n_lags
 
     def set_dataset(self, dataset):
         if(len(dataset) == 0):
@@ -65,10 +65,10 @@ class Optimizador:
 
     def nn_structure(self, lagged_dataset, w):
         result = lagged_dataset @ np.reshape(
-            w[:N_ACTIONS*N_LAGS*NEURONS], (N_ACTIONS*N_LAGS, NEURONS))
+            w[:self.n_action*self.n_lags*self.neurons], (self.n_action*self.n_lags, self.neurons))
         result = np.tanh(result)
-        result = result @ np.reshape(w[N_ACTIONS *
-                                     N_LAGS*NEURONS:], (NEURONS, N_ACTIONS))
+        result = result @ np.reshape(w[self.n_action *
+                                     self.n_lags*self.neurons:], (self.neurons, self.n_action))
         result[result < 0] = 0
         for index in range(len(result)):
             result.iloc[index] = result.iloc[index] / \
@@ -84,15 +84,15 @@ class Optimizador:
         ativos_chg = ativos.pct_change()
         tmp_variations = []
         cash_memory = [cash, ]
-        for index in range(N_LAGS, len(ativos)):
+        for index in range(self.n_lags, len(ativos)):
             tmp_chg = ativos_chg.iloc[index].values
-            tmp_pesos = port_pesos.iloc[index-N_LAGS].values
+            tmp_pesos = port_pesos.iloc[index-self.n_lags].values
             cash_variation = tmp_chg @  tmp_pesos
             cash = cash*(1+cash_variation)
             cash_memory.append(cash)
             tmp_variations.append(cash_variation)
         variation_estable = np.array(
-            tmp_variations) - ativos_chg.iloc[N_LAGS:, -3]
+            tmp_variations) - ativos_chg.iloc[self.n_lags:, -3]
         rets = variation_estable.mean()*252
         vols = variation_estable.std()*np.sqrt(252)
         sharpe = rets/(vols*2)
@@ -110,24 +110,27 @@ class Optimizador:
 
     def plot(self, dataset, variations):
         data = dataset.copy()
-        data = data.iloc[N_LAGS-1:]
+        data = data.iloc[self.n_lags-1:]
         data = data / data.iloc[0]*100
         data["Thal-ia"] = variations
         print(data.tail())
-        data[N_LAGS-1:].plot()
+        data[self.n_lags-1:].plot()
 
     def run(self, l_dataset, dataset):
         options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
         optimizer = ps.single.GlobalBestPSO(
-            n_particles=20, dimensions=NEURONS*N_ACTIONS*(N_LAGS+1), options=options)
+            n_particles=20, dimensions=self.neurons*self.n_action*(self.n_lags+1), options=options)
         return optimizer.optimize(self.optimization, iters=100, lagged_dataset=l_dataset, dataset=dataset, n_processes=4)
 
 
 if __name__ == "__main__":
-    opt = Optimizador()
+    N_ACTIONS = 6
+    N_LAGS = 3
+    NEURONS = 10
+    opt = Optimizador(N_ACTIONS,N_LAGS,NEURONS)
     dataset = opt.clean_dataset("../../datasets/Dados-Trabalho-2004-2015.xlsx")
-    datasets = opt.split_dataset(dataset,3)
-    dataset_lagged = opt.lag_variables(datasets[0], N_LAGS)
+    datasets = opt.split_dataset(dataset, 3)
+    dataset_lagged = opt.lag_variables(datasets[0], opt.n_lags)
     cost, pos = opt.run(dataset_lagged, datasets[0])
 
     # %%
@@ -137,13 +140,13 @@ if __name__ == "__main__":
     opt.plot(datasets[0], variations)
     sharpe, cash
     # %%
-    dataset_lagged_2 = opt.lag_variables(datasets[1], N_LAGS)
+    dataset_lagged_2 = opt.lag_variables(datasets[1], opt.n_lags)
     pesos = opt.nn_structure(dataset_lagged_2, pos)
     sharpe, cash, variations = opt.calc_cash(datasets[1], pesos)
     opt.plot(datasets[1], variations)
     sharpe, cash
     # %%
-    dataset_main_lagged = opt.lag_variables(dataset, N_LAGS)
+    dataset_main_lagged = opt.lag_variables(dataset, opt.n_lags)
     pesos = opt.nn_structure(dataset_main_lagged, pos)
     sharpe, cash, variations = opt.calc_cash(dataset, pesos)
     opt.plot(dataset, variations)
