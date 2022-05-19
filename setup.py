@@ -26,5 +26,6 @@ setuptools.setup(
     install_requires=[
        "numpy>=1.21.5",
        "pandas>=1.3.4",
+       "pyswarms"
    ],
 )
