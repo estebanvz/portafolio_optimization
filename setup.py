@@ -23,9 +23,5 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.7.9",
-    install_requires=[
-       "numpy>=1.21.5",
-       "pandas>=1.3.4",
-       "pyswarms"
-   ],
+    install_requires=["numpy>=1.21.5", "pandas>=1.3.4", "pyswarms"],
 )
